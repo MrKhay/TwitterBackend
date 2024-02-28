@@ -41,37 +41,34 @@ router.get("/:id", async (req, res) => {
 });
 
 // update user
-router.put("/:id",async (req, res) => {
+router.put("/:id", async (req, res) => {
   const { id } = req.params;
 
   const { bio, image, name } = req.body;
 
-
   try {
     const result = await prisma.user.update({
-        where: { id: Number(id) },
-        data: { bio,name,image}, },
-        );
+      where: { id: Number(id) },
+      data: { bio, name, image },
+    });
 
-      res.json({result});
+    res.json({ result });
   } catch (error) {
     res.status(501).json({ error: `Failed to update user details` });
-
   }
 });
 
 // delete user
-router.delete("/:id", async(req, res) => {
+router.delete("/:id", async (req, res) => {
   const { id } = req.params;
 
   try {
-     await prisma.user.delete({where:{id:Number(id)}})
+    await prisma.user.delete({ where: { id: Number(id) } });
 
     res.status(200).json("Success");
   } catch (error) {
     res.status(400).json("User does not exist");
   }
-
 });
 
 export default router;
