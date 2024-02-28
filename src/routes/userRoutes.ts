@@ -10,7 +10,7 @@ router.post("/", async (req, res) => {
   const { email, name, username } = req.body;
 
   try {
-    const result = await prisma.user.create({
+    const responce = await prisma.user.create({
       data: {
         email,
         name,
@@ -19,7 +19,7 @@ router.post("/", async (req, res) => {
       },
     });
 
-    res.json(result);
+    res.json(responce);
   } catch (e) {
     res.status(400).json({ error: "username and email should be unique" });
   }
@@ -47,14 +47,14 @@ router.put("/:id", async (req, res) => {
   const { bio, image, name } = req.body;
 
   try {
-    const result = await prisma.user.update({
+    const responce = await prisma.user.update({
       where: { id: Number(id) },
       data: { bio, name, image },
     });
 
-    res.json({ result });
+    res.json({ responce });
   } catch (error) {
-    res.status(501).json({ error: `Failed to update user details` });
+    res.status(501).json({ error: error });
   }
 });
 
