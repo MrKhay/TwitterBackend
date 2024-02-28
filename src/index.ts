@@ -10,7 +10,6 @@ app.use('/tweet',tweetRoutes);
   
 
 
-// app.METHOD(PATH, HANDLER)
 
 
 // listen and serve
