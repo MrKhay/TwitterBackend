@@ -10,34 +10,49 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-
 model User {
   id Int @id @default(autoincrement())
 
-  email String @unique 
-  name String 
-  username String @unique
-  image String? 
-  bio String?
-  isVerified Boolean @default(false)
+  email String @unique
 
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt 
-  
+  name       String?
+  username   String?  @unique
+  image      String?
+  bio        String?
+  isVerified Boolean  @default(false)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+
   tweets Tweet[]
+  Token  Token[]
 }
 
+model Token {
+  id        Int      @id @default(autoincrement())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  type       String // EMAIL|API
+  emailToken String?  @unique
+  valid      Boolean  @default(true)
+  expiration DateTime
+
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
+}
 
 model Tweet {
   id Int @id @default(autoincrement())
 
-  content String 
-  image String?
-  impression Int @default(0)
+  content    String
+  image      String?
+  impression Int     @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  userId Int 
-  user User @relation(fields: [userId],references: [id])
+  userId Int
+  user   User @relation(fields: [userId], references: [id])
 }
+
+// enum TokenType {}

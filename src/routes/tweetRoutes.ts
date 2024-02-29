@@ -1,5 +1,8 @@
 import { PrismaClient } from "@prisma/client";
 import { Router } from "express";
+import { env } from "process";
+import jwt from "jsonwebtoken";
+import { AuthRequest } from "../middlewares/authMiddlewear";
 
 const router = Router();
 const prisma = new PrismaClient();
@@ -7,14 +10,20 @@ const prisma = new PrismaClient();
 // Tweet CRUD
 
 // Create tweet
-router.post("/", async (req, res) => {
-  const { content, userId, image } = req.body;
+router.post("/", async (req: AuthRequest, res) => {
+  const { content, image } = req.body;
+  const user = req.user;
+
+  if (!user) {
+    res.sendStatus(401);
+    return;
+  }
 
   try {
     const responce = await prisma.tweet.create({
       data: {
         content,
-        userId,
+        userId: user.id,
         image,
       },
     });
@@ -28,10 +37,21 @@ router.post("/", async (req, res) => {
 // list tweet
 router.get("/", async (req, res) => {
   try {
-    const responce = await prisma.tweet.findMany();
+    const responce = await prisma.tweet.findMany({
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            username: true,
+            image: true,
+          },
+        },
+      },
+    });
     res.json({ tweets: responce });
   } catch (error) {
-    res.status(401).json({ error: "Something went wrong" });
+    res.status(404).json({ error: "Something went wrong" });
   }
 });
 
@@ -43,6 +63,11 @@ router.get("/:id", async (req, res) => {
     const responce = await prisma.tweet.findUnique({
       where: { id: Number(id) },
     });
+
+    if (!responce) {
+      res.status(404).json({ error: "Tweet not found" });
+      return;
+    }
     res.json(responce);
   } catch (error) {
     res.status(401).json({ error: "Something went wrong" });
@@ -50,16 +75,22 @@ router.get("/:id", async (req, res) => {
 });
 
 // update tweet
-router.put("/:id", async (req, res) => {
+router.put("/:id", async (req: AuthRequest, res) => {
   const { id } = req.params;
-  const { content, userId, image } = req.body;
+  const { content, image } = req.body;
+  const user = req.user;
+
+  if (!user) {
+    res.sendStatus(401);
+    return;
+  }
 
   try {
     const responce = await prisma.tweet.update({
       where: { id: Number(id) },
       data: {
         content,
-        userId,
+        userId: user.id,
         image,
       },
     });
